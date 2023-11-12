@@ -119,7 +119,7 @@ def obtener_columnas_validas(tablero):
     return [col for col in range(1, COLUMNAS + 1) if es_columna_valida(tablero, col - 1)]
 
 # Algoritmo Minimax para tomar decisiones en el juego
-def minimax(tablero, profundidad, jugador):
+def minimax(tablero, profundidad, alfa, beta, jugador):
     columnas_validas = obtener_columnas_validas(tablero)
     nodo_terminal = es_nodo_terminal(tablero)
 
@@ -141,10 +141,13 @@ def minimax(tablero, profundidad, jugador):
         for col in columnas_validas:
             tablero_copia = [fila[:] for fila in tablero]
             if soltar_ficha(tablero_copia, col - 1, IA):
-                nuevo_puntaje = minimax(tablero_copia, profundidad-1, JUGADOR)[1]
+                nuevo_puntaje = minimax(tablero_copia, profundidad-1, alfa, beta, JUGADOR)[1]
                 if nuevo_puntaje > max_valor:
                     max_valor = nuevo_puntaje
                     columna = col
+                alfa = max(alfa, max_valor)
+                if alfa >= beta:
+                    break
 
         return columna, max_valor
     else:
@@ -154,10 +157,13 @@ def minimax(tablero, profundidad, jugador):
         for col in columnas_validas:
             tablero_copia = [fila[:] for fila in tablero]
             if soltar_ficha(tablero_copia, col - 1, JUGADOR):
-                nuevo_puntaje = minimax(tablero_copia, profundidad-1, IA)[1]
+                nuevo_puntaje = minimax(tablero_copia, profundidad-1, alfa, beta, IA)[1]
                 if nuevo_puntaje < min_valor:
                     min_valor = nuevo_puntaje
                     columna = col
+                beta = min(beta, min_valor)
+                if alfa >= beta:
+                    break
 
         return columna, min_valor
 
@@ -191,7 +197,7 @@ while not fin_del_juego:
                 print("Por favor, ingrese un número válido.")
     else:
         print("Turno de Jugador 2:\n")
-        col, _ = minimax(tablero, 4, IA)
+        col, _ = minimax(tablero, 4, -math.inf, math.inf, IA)
         if es_columna_valida(tablero, col - 1):
             soltar_ficha(tablero, col - 1, IA)
             if estado_victoria(tablero, IA):
